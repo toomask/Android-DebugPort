@@ -1,5 +1,6 @@
 package jwf.debugport;
 
+import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -20,6 +21,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import jwf.debugport.internal.debug.ActivityToInterpreterAssigner;
 import jwf.debugport.internal.debug.DebugTelnetServer;
 import jwf.debugport.internal.TelnetServer;
 import jwf.debugport.internal.Utils;
@@ -245,6 +247,7 @@ public class DebugPortService extends Service {
      * Called by {@link DebugPortContentProvider} to initialize the service.
      */
     static void initialize(Context context) {
+        ActivityToInterpreterAssigner.INSTANCE = new ActivityToInterpreterAssigner((Application) context.getApplicationContext());
         Intent intent = new Intent(context, DebugPortService.class);
         intent.setAction(ACTION_INITIALIZE);
         context.startService(intent);
