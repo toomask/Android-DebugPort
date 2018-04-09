@@ -21,7 +21,7 @@ allprojects {
 In your application's `build.gradle` file, add a dependency for Android DebugPort:
 
 ```groovy
-    debugImplementation 'com.github.toomask.Android-DebugPort:lib:3.0.0'
-    releaseImplementation 'com.github.toomask.Android-DebugPort:lib-noop:3.0.0'
+    debugImplementation 'com.github.toomask.Android-DebugPort:lib:3.0.1'
+    releaseImplementation 'com.github.toomask.Android-DebugPort:lib-noop:3.0.1'
 ```
 
