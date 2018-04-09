@@ -1,9 +1,9 @@
 Fork of https://github.com/jasonwyatt/Android-DebugPort
 
 Changes:
-- Provides easy access to Activities through predefined "activity" and "activities" fields.
 - Starts servers by default
 - Sets "setAccessibility(true)" in interpreter by default.
+- Provides access for application to set object that can be accessed from debugging console. Use DebugPort.set("object", someObject).
 
 ### Configure Your Dependencies
 
@@ -21,7 +21,7 @@ allprojects {
 In your application's `build.gradle` file, add a dependency for Android DebugPort:
 
 ```groovy
-    debugImplementation 'com.github.toomask.Android-DebugPort:lib:3.0.1'
-    releaseImplementation 'com.github.toomask.Android-DebugPort:lib-noop:3.0.1'
+    debugImplementation 'com.github.toomask.Android-DebugPort:lib:3.0.2'
+    releaseImplementation 'com.github.toomask.Android-DebugPort:lib-noop:3.0.2'
 ```
 

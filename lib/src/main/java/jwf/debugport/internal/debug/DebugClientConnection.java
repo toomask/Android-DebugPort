@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import bsh.Interpreter;
+import jwf.debugport.DebugPort;
 import jwf.debugport.internal.debug.commands.Commands;
 import jwf.debugport.internal.ClientConnection;
 import jwf.debugport.internal.TelnetServer;
@@ -15,6 +16,7 @@ import jwf.debugport.internal.TelnetServer;
  */
 public class DebugClientConnection extends ClientConnection implements Commands.ExitListener {
     private TelnetConsoleInterface mConsole;
+    Interpreter interpreter;
 
     public DebugClientConnection(Context context, Socket client, TelnetServer parent, String[] startupCommands) {
         super(context, client, parent, startupCommands);
@@ -29,14 +31,13 @@ public class DebugClientConnection extends ClientConnection implements Commands.
     public void run() {
         try {
             mConsole = new TelnetConsoleInterface(getSocket().getInputStream(), getSocket().getOutputStream());
-            Interpreter interpreter = new Interpreter(mConsole);
+            interpreter = new Interpreter(mConsole);
             interpreter.setShowResults(true);
             interpreter.set("cmd", new Commands(this));
             interpreter.set("app", getApp());
             interpreter.eval("setAccessibility(true)");
-            ActivityToInterpreterAssigner.INSTANCE.assign(interpreter);
             interpreter.eval("importCommands(\"jwf.debugport.internal.debug.commands\")");
-
+            DebugPort.registerInterpreter(interpreter);
             for (String startupCommand : getStartupCommands()) {
                 interpreter.eval(startupCommand);
             }
@@ -54,6 +55,7 @@ public class DebugClientConnection extends ClientConnection implements Commands.
     public void onExit() {
         try {
             mConsole.close();
+            DebugPort.deregisterInterpreter(interpreter);
         } catch (IOException e) {
             // m'eh
         }

@@ -12,6 +12,7 @@ import android.widget.ToggleButton;
 
 import java.util.Locale;
 
+import jwf.debugport.DebugPort;
 import jwf.debugport.DebugPortService;
 import jwf.debugport.Params;
 
@@ -22,7 +23,7 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        DebugPort.set("activity", this);
         setContentView(R.layout.main_activity);
 
         ToggleButton toggle = (ToggleButton) findViewById(R.id.server_toggle);

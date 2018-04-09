@@ -13,7 +13,6 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 
-import jwf.debugport.internal.debug.ActivityToInterpreterAssigner;
 import jwf.debugport.internal.debug.DebugTelnetServer;
 import jwf.debugport.internal.TelnetServer;
 import jwf.debugport.internal.sqlite.SQLiteTelnetServer;
@@ -158,7 +157,6 @@ public class DebugPortService extends Service {
      * Called by {@link DebugPortContentProvider} to initialize the service.
      */
     static void initialize(Context context) {
-        ActivityToInterpreterAssigner.INSTANCE = new ActivityToInterpreterAssigner((Application) context.getApplicationContext());
         Intent intent = new Intent(context, DebugPortService.class);
         intent.setAction(ACTION_INITIALIZE);
         context.startService(intent);
