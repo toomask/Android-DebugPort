@@ -1,10 +1,6 @@
 package jwf.debugport;
 
 import android.app.Application;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -12,19 +8,14 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import jwf.debugport.internal.debug.ActivityToInterpreterAssigner;
 import jwf.debugport.internal.debug.DebugTelnetServer;
 import jwf.debugport.internal.TelnetServer;
-import jwf.debugport.internal.Utils;
 import jwf.debugport.internal.sqlite.SQLiteTelnetServer;
 
 /**
@@ -64,7 +55,7 @@ public class DebugPortService extends Service {
      * Utility method to start the DebugPortService.
      * @param params Parameters to configure the service.
      */
-    public static void start(Context context, @NonNull Params params) {
+    public static void start(Context context, Params params) {
         Intent intent = new Intent(context, DebugPortService.class);
         intent.setAction(ACTION_START);
         intent.putExtra(INTENT_EXTRA_PARAMS, params);
@@ -102,7 +93,6 @@ public class DebugPortService extends Service {
             mWakeLock = null;
         }
         mServersStarted = false;
-        showNotification();
     }
 
     private void startServers(Params params) {
@@ -120,11 +110,6 @@ public class DebugPortService extends Service {
         new AsyncTask<Params, Void, Void>() {
             @SuppressWarnings("deprecation")
             @Override
-            protected void onPostExecute(Void res) {
-                showNotification();
-            }
-
-            @Override
             protected Void doInBackground(Params... params) {
                 try {
                     mDebugServer = new DebugTelnetServer(DebugPortService.this, params[0]);
@@ -139,10 +124,6 @@ public class DebugPortService extends Service {
         }.execute(params);
     }
 
-    private void showNotification() {
-        startForeground(NOTIFICATION_ID, buildNotification(mParams));
-    }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (ACTION_STOP.equals(intent.getAction())) {
@@ -151,8 +132,7 @@ public class DebugPortService extends Service {
             Params params = intent.getParcelableExtra(INTENT_EXTRA_PARAMS);
             startServers(params);
         } else if (ACTION_INITIALIZE.equals(intent.getAction())) {
-            startServers(new Params());
-            showNotification();
+            start(this);
         } else if (ACTION_KILL.equals(intent.getAction())) {
             kill(this);
             return START_NOT_STICKY;
@@ -167,75 +147,6 @@ public class DebugPortService extends Service {
         super.onDestroy();
         stopServers();
         stopForeground(true);
-    }
-
-    private Notification buildNotification(@Nullable Params params) {
-        NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mgr.createNotificationChannel(new NotificationChannel(NOTIFICATION_CHANNEL, getString(R.string.debugport_notification_channel_name), NotificationManager.IMPORTANCE_MIN));
-        }
-
-        if (params == null) {
-            params = getManifestParams(this);
-        }
-
-        String ip = Utils.getIpAddress(this);
-        String message;
-        String summary;
-        if (mServersStarted) {
-            message = getString(R.string.debugport_notification_subtitle_running, ip, params.getDebugPort(), params.getSQLitePort());
-            summary = getString(R.string.debugport_notification_summary_running, ip, params.getDebugPort(), params.getSQLitePort());
-        } else {
-            message = getString(R.string.debugport_notification_subtitle_stopped);
-            summary = getString(R.string.debugport_notification_summary_stopped);
-        }
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setSmallIcon(R.drawable.debugport_ic_notification);
-        int appLabel = getApplicationInfo().labelRes;
-        if (appLabel == 0) {
-            builder.setContentTitle(getString(R.string.debugport_notification_title_plain));
-        } else {
-            builder.setContentTitle(getString(R.string.debugport_notification_title, getString(appLabel)));
-        }
-        builder.setStyle(new NotificationCompat.BigTextStyle().bigText(message).setSummaryText(summary));
-        builder.setPriority(NotificationCompat.PRIORITY_MIN);
-        builder.setContentText(message);
-        builder.addAction(mServersStarted ? buildStopAction() : buildStartAction(params));
-        builder.addAction(buildKillAction());
-        builder.setChannelId(NOTIFICATION_CHANNEL);
-
-        return builder.build();
-    }
-
-    private NotificationCompat.Action buildKillAction() {
-        Intent intent = new Intent(this, DebugPortService.class);
-        intent.setAction(ACTION_KILL);
-
-        PendingIntent pIntent = PendingIntent.getService(this, STOP_REQUEST_CODE, intent, 0);
-
-        return new NotificationCompat.Action.Builder(0, getString(R.string.debugport_notification_action_kill), pIntent).build();
-    }
-
-    private NotificationCompat.Action buildStopAction() {
-        Intent intent = new Intent(this, DebugPortService.class);
-        intent.setAction(ACTION_STOP);
-
-        PendingIntent pIntent = PendingIntent.getService(this, STOP_REQUEST_CODE, intent, 0);
-
-        return new NotificationCompat.Action.Builder(0, getString(R.string.debugport_notification_action_stop), pIntent)
-                .build();
-    }
-
-    private NotificationCompat.Action buildStartAction(@NonNull Params params) {
-        Intent intent = new Intent(this, DebugPortService.class);
-        intent.setAction(ACTION_START);
-        intent.putExtra(INTENT_EXTRA_PARAMS, params);
-
-        PendingIntent pIntent = PendingIntent.getService(this, START_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        return new NotificationCompat.Action.Builder(0, getString(R.string.debugport_notification_action_start), pIntent)
-                .build();
     }
 
     @Override

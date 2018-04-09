@@ -2,7 +2,6 @@ package jwf.debugport;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
 
 /**
  * Configuration parameters for the {@link DebugPortService}
@@ -74,7 +73,7 @@ public class Params implements Parcelable {
      * is given control.  This can be useful if you need to run a bunch of <code>import</code>
      * statements, or configure some state.
      */
-    public Params setStartupCommands(@Nullable String[] commands) {
+    public Params setStartupCommands(String[] commands) {
         if (commands == null) {
             commands = new String[0];
         }

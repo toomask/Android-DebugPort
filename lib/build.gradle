@@ -21,7 +21,6 @@ android {
 
 dependencies {
     compile "org.apache-extras.beanshell:bsh:2.0b6"
-    compile "com.android.support:support-compat:26.1.0"
 }
 
 // build a jar with source files
