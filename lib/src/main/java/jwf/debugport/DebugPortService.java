@@ -149,6 +149,7 @@ public class DebugPortService extends Service {
             Params params = intent.getParcelableExtra(INTENT_EXTRA_PARAMS);
             startServers(params);
         } else if (ACTION_INITIALIZE.equals(intent.getAction())) {
+            startServers(new Params());
             showNotification();
         } else if (ACTION_KILL.equals(intent.getAction())) {
             kill(this);
